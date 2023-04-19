@@ -52,9 +52,9 @@ def check(position: tuple) -> (bool or int):
     return s
 
 
-def findSolution(position: tuple, all=False) -> (tuple or bool):
+def findSolution(position: tuple, all=True) -> (tuple or bool):
     """Retourne une ou plusieurs solutions à cette position."""
-    """Usage : findSolution(<position>) ou findSolution(<position>, all=True)"""
+    """Usage : findSolution(<position>) ou findSolution(<position>, all=False)"""
     """Retourne False si pas de solution, ou les solutions sous forme d'un tuple de tuples."""
     # Si la position est gagnante, pas de solutions.
     nsomme = check(position)
@@ -65,6 +65,8 @@ def findSolution(position: tuple, all=False) -> (tuple or bool):
     for tas in listAllNumber(position):
         if firstBit(tas) == nfirstbit:
             solutions.append(replaceInPosition(position, tas, tas ^ nsomme))
+            if all == False:
+                return tuple(solutions)
 
     if solutions != []:
         return tuple(solutions)
