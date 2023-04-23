@@ -33,12 +33,12 @@ def btncommand(column):
     if tasselected == None or tasselected == column:
         tasselected = column
         if jetonsselected < len(gameframes[column].jetons):
-            gameframes[tasselected].jetons[jetonsselected].configure(text="X")
+            gameframes[column].jetons[jetonsselected].configure(bg="purple")
             jetonsselected += 1
             playerbtn["state"] = "normal"
         else:
             for k in gameframes[column].jetons:
-                k.configure(text="   ")
+                k.configure(bg="grey")
             jetonsselected = 0
             tasselected = None
             playerbtn["state"] = "disabled"
@@ -51,7 +51,11 @@ class FrameTas:
         self.ncolumn = column
         self.nbjetons = jetons
         self.jetons = []
-        self.frame.grid(column=self.ncolumn, row=0, sticky=(N, E, W, S))
+        self.frame.grid(
+            column=self.ncolumn,
+            row=0,
+            sticky=(N, E, W, S),
+        )
         self.generate()
 
     def generate(self):
@@ -61,12 +65,10 @@ class FrameTas:
                     self.frame,
                     text=" ",
                     width=1,
-                )
-            )
-            for k in self.jetons:
-                k.configure(
+                    bg="grey",
                     command=lambda column=self.ncolumn: btncommand(column),
                 )
+            )
             self.jetons[i].grid(column=0, row=i)
 
 
@@ -80,7 +82,9 @@ def startgame(tas, jetons):
     for widget in gamescene.winfo_children():
         widget.destroy()
     for i in range(tas):
-        gameframes.append(FrameTas(random.randrange(1, jetons + 1), i))
+        gameframes.append(
+            FrameTas(random.randrange(1, jetons + 1), i),
+        )
     GAME = game.NewGame([i.nbjetons for i in gameframes])
     playerbtn["state"] = "disabled"
     ordibtn["state"] = "normal"
@@ -93,7 +97,9 @@ def userplay():
     for widget in gamescene.winfo_children():
         widget.destroy()
     for i in range(len(GAME.position)):
-        gameframes.append(FrameTas(GAME.position[i], i))
+        gameframes.append(
+            FrameTas(GAME.position[i], i),
+        )
     tasselected = None
     jetonsselected = 0
     playerbtn["state"] = "disabled"
@@ -120,7 +126,9 @@ def ordiplay():
 
 def endMsg():
     global gamescene
-    Label(gamescene, text="La partie est finie").grid(sticky=(N, S, W, E))
+    Label(gamescene, text="La partie est finie",).grid(
+        sticky=(N, S, W, E),
+    )
 
 
 gameframes = []
