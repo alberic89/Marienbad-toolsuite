@@ -21,9 +21,10 @@
 #  MA 02110-1301, USA.
 #
 #
-import random
+import random, os, time
 import game
 from tkinter import *
+from tkinter import ttk
 
 GAME = None
 
@@ -33,12 +34,12 @@ def btncommand(column):
     if tasselected == None or tasselected == column:
         tasselected = column
         if jetonsselected < len(gameframes[column].jetons):
-            gameframes[column].jetons[jetonsselected].configure(bg="purple")
+            gameframes[column].jetons[jetonsselected].configure(background="#3DAEE9")
             jetonsselected += 1
             playerbtn["state"] = "normal"
         else:
             for k in gameframes[column].jetons:
-                k.configure(bg="grey")
+                k.configure(background="#BBBCBE")
             jetonsselected = 0
             tasselected = None
             playerbtn["state"] = "disabled"
@@ -47,7 +48,7 @@ def btncommand(column):
 class FrameTas:
     def __init__(self, jetons, column):
         global gamescene
-        self.frame = Frame(gamescene)
+        self.frame = ttk.Frame(gamescene)
         self.ncolumn = column
         self.nbjetons = jetons
         self.jetons = []
@@ -65,7 +66,7 @@ class FrameTas:
                     self.frame,
                     text=" ",
                     width=1,
-                    bg="grey",
+                    background="#BBBCBE",
                     command=lambda column=self.ncolumn: btncommand(column),
                 )
             )
@@ -91,38 +92,33 @@ def startgame(tas, jetons):
 
 
 def userplay():
-    global gameframes, tasselected, jetonsselected, GAME, gamescene
+    global tasselected, jetonsselected, GAME
     GAME.player(tasselected, jetonsselected)
-    gameframes.clear()
-    for widget in gamescene.winfo_children():
-        widget.destroy()
-    for i in range(len(GAME.position)):
-        gameframes.append(
-            FrameTas(GAME.position[i], i),
-        )
-    tasselected = None
-    jetonsselected = 0
-    playerbtn["state"] = "disabled"
-    if GAME.isEnded():
-        ordibtn["state"] = "disabled"
-        endMsg()
-
+    updateGame()
 
 def ordiplay():
-    global gameframes, tasselected, jetonsselected, GAME, gamescene
+    global gameframes, tasselected, jetonsselected, GAME
     GAME.ordi()
-    gameframes.clear()
-    for widget in gamescene.winfo_children():
-        widget.destroy()
+    for i in range(jetonsselected):
+        gameframes[tasselected].jetons[i].configure(bg="#BBBCBE")
     for i in range(len(GAME.position)):
-        gameframes.append(FrameTas(GAME.position[i], i))
+        if GAME.position[i] != len(gameframes[i].jetons):
+            tasselected = i
+            jetonsselected = len(gameframes[i].jetons) - GAME.position[i]
+            break
+    updateGame()
+
+
+def updateGame():
+    global gameframes, tasselected, jetonsselected, gamescene
+    gameframes[tasselected].frame.destroy()
+    gameframes[tasselected] = FrameTas(GAME.position[tasselected], tasselected)
     tasselected = None
     jetonsselected = 0
     playerbtn["state"] = "disabled"
     if GAME.isEnded():
         ordibtn["state"] = "disabled"
         endMsg()
-
 
 def endMsg():
     global gamescene
@@ -130,6 +126,12 @@ def endMsg():
         sticky=(N, S, W, E),
     )
 
+def checkSpin():
+    global startgameframebtn
+    if tasval.get() == 0 or jetonsval.get() == 0:
+        startgameframebtn["state"] = "disabled"
+    else :
+        startgameframebtn["state"] = "normal"
 
 gameframes = []
 tasselected = None
@@ -137,6 +139,9 @@ jetonsselected = 0
 
 ROOT = Tk()
 ROOT.title("Marienbad Game")
+s = ttk.Style()
+ROOT.tk.call('source', os.path.abspath(os.path.curdir) + '/ttk-Breeze/breeze.tcl')
+s.theme_use("Breeze")
 window_width = 600
 window_height = 600
 screen_width = ROOT.winfo_screenwidth()
@@ -163,28 +168,31 @@ ROOT.rowconfigure(1, weight=15, minsize=400)
 ROOT.rowconfigure(2, weight=1, minsize=40)
 
 
-startgameframe = Frame(ROOT)
+startgameframe = ttk.Frame(ROOT)
 tasval = IntVar()
-choicetas = Spinbox(
+choicetas = ttk.Spinbox(
     startgameframe,
     from_=1,
     to=15,
     textvariable=tasval,
     width=5,
+    command=checkSpin,
 )
-choicetaslabel = Label(startgameframe, text="Nombre de tas")
+choicetaslabel = ttk.Label(startgameframe, text="Nombre de tas")
 jetonsval = IntVar()
-choicejetons = Spinbox(
+choicejetons = ttk.Spinbox(
     startgameframe,
     from_=1,
     to=15,
     textvariable=jetonsval,
     width=5,
+    command=checkSpin,
 )
-choicejetonslabel = Label(startgameframe, text="Nombre de jetons")
-startgameframebtn = Button(
+choicejetonslabel = ttk.Label(startgameframe, text="Nombre de jetons")
+startgameframebtn = ttk.Button(
     startgameframe,
     text="Démarrer le jeu",
+    state="disabled",
     command=lambda: [
         startgame(tasval.get(), jetonsval.get()),
     ],
@@ -209,20 +217,20 @@ choicejetons.grid(column=0, row=1, sticky=(N, S, E))
 choicejetonslabel.grid(column=1, row=1, sticky=(N, S, W))
 startgameframebtn.grid(column=2, row=0, rowspan=2)
 
-gamescene = Frame(ROOT)
+gamescene = ttk.Frame(ROOT)
 for i in range(15):
     gamescene.columnconfigure(i, weight=1, minsize=25)
 gamescene.rowconfigure(0, weight=1, minsize=80)
 gamescene.grid(column=0, row=1, sticky=(N, S, W, E))
 
-playframe = Frame(ROOT)
-playerbtn = Button(
+playframe = ttk.Frame(ROOT)
+playerbtn = ttk.Button(
     playframe,
     text="Jouer",
     state="disabled",
     command=userplay,
 )
-ordibtn = Button(
+ordibtn = ttk.Button(
     playframe,
     text="L'ordinateur joue",
     state="disabled",

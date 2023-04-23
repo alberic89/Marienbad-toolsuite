@@ -1,0 +1,4 @@
+[submodule "ttk-Breeze"]
+	path = ttk-Breeze
+	url = https://github.com/MaxPerl/ttk-Breeze.git
+	branch = v0.6
