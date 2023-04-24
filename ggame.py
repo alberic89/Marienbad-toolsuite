@@ -21,10 +21,13 @@
 #  MA 02110-1301, USA.
 #
 #
+
 import random, os, time
-import game
 from tkinter import *
 from tkinter import ttk
+
+import game
+
 
 GAME = None
 
@@ -34,7 +37,9 @@ def btncommand(column):
     if tasselected == None or tasselected == column:
         tasselected = column
         if jetonsselected < len(gameframes[column].jetons):
-            gameframes[column].jetons[jetonsselected].configure(background="#3DAEE9")
+            gameframes[column].jetons[-(jetonsselected + 1)].configure(
+                background="#3DAEE9"
+            )
             jetonsselected += 1
             playerbtn["state"] = "normal"
         else:
@@ -94,7 +99,10 @@ def startgame(tas, jetons):
 def userplay():
     global tasselected, jetonsselected, GAME
     GAME.player(tasselected, jetonsselected)
+    for i in range(jetonsselected):
+        gameframes[tasselected].jetons[i].configure(bg="#BBBCBE")
     updateGame()
+
 
 def ordiplay():
     global gameframes, tasselected, jetonsselected, GAME
@@ -111,6 +119,7 @@ def ordiplay():
 
 def updateGame():
     global gameframes, tasselected, jetonsselected, gamescene
+    blink()
     gameframes[tasselected].frame.destroy()
     gameframes[tasselected] = FrameTas(GAME.position[tasselected], tasselected)
     tasselected = None
@@ -118,20 +127,40 @@ def updateGame():
     playerbtn["state"] = "disabled"
     if GAME.isEnded():
         ordibtn["state"] = "disabled"
+        startgameframebtn["state"] = "disabled"
         endMsg()
+
 
 def endMsg():
     global gamescene
-    Label(gamescene, text="La partie est finie",).grid(
+    Label(
+        gamescene,
+        text="La partie est finie",
+    ).grid(
         sticky=(N, S, W, E),
     )
+
 
 def checkSpin():
     global startgameframebtn
     if tasval.get() == 0 or jetonsval.get() == 0:
         startgameframebtn["state"] = "disabled"
-    else :
+    else:
         startgameframebtn["state"] = "normal"
+
+
+def blink():
+    global gameframes, tasselected, jetonsselected, ROOT
+    for loop in range(3):
+        for i in range(jetonsselected):
+            gameframes[tasselected].jetons[-(i + 1)].configure(bg="#3DAEE9")
+            gameframes[tasselected].jetons[-(i + 1)].update()
+        time.sleep(0.5)
+        for i in range(jetonsselected):
+            gameframes[tasselected].jetons[-(i + 1)].configure(bg="#BBBCBE")
+            gameframes[tasselected].jetons[-(i + 1)].update()
+        time.sleep(0.3)
+
 
 gameframes = []
 tasselected = None
@@ -140,7 +169,14 @@ jetonsselected = 0
 ROOT = Tk()
 ROOT.title("Marienbad Game")
 s = ttk.Style()
-ROOT.tk.call('source', os.path.abspath(os.path.curdir) + '/ttk-Breeze/breeze.tcl')
+ROOT.tk.call(
+    "source",
+    os.path.join(
+        os.path.abspath(os.path.curdir),
+        "ttk-Breeze",
+        "breeze.tcl",
+    ),
+)
 s.theme_use("Breeze")
 window_width = 600
 window_height = 600
