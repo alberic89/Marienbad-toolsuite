@@ -22,4 +22,5 @@
 #
 #
 import ggame
-ggame.ROOT.mainloop()
+app = ggame.App()
+app.start()
