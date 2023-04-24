@@ -28,137 +28,6 @@ from tkinter import ttk
 
 import game
 
-
-def btncommand(column):
-    global app
-    if app.tasselected == None or app.tasselected == column:
-        app.tasselected = column
-        if app.jetonsselected < len(app.gameframes[column].jetons):
-            app.gameframes[column].jetons[-(app.jetonsselected + 1)].configure(
-                background="#3DAEE9"
-            )
-            app.jetonsselected += 1
-            app.playerbtn["state"] = "normal"
-        else:
-            for k in app.gameframes[column].jetons:
-                k.configure(background="#BBBCBE")
-            app.jetonsselected = 0
-            app.tasselected = None
-            app.playerbtn["state"] = "disabled"
-
-
-class FrameTas:
-    def __init__(self, jetons, column, gamescene):
-        self.frame = ttk.Frame(gamescene)
-        self.ncolumn = column
-        self.nbjetons = jetons
-        self.jetons = []
-        self.frame.grid(
-            column=self.ncolumn,
-            row=0,
-            sticky=(N, E, W, S),
-        )
-        self.generate()
-
-    def generate(self):
-        for i in range(self.nbjetons):
-            self.jetons.append(
-                Button(
-                    self.frame,
-                    text=" ",
-                    width=1,
-                    background="#BBBCBE",
-                    command=lambda column=self.ncolumn: btncommand(column),
-                )
-            )
-            self.jetons[i].grid(column=0, row=i)
-
-
-def startgame(tas, jetons):
-    random.seed()
-    global app
-    app.gameframes.clear()
-    app.tasselected = None
-    app.jetonsselected = 0
-    for widget in app.gamescene.winfo_children():
-        widget.destroy()
-    for i in range(tas):
-        app.gameframes.append(
-            FrameTas(random.randrange(1, jetons + 1), i, app.gamescene)
-        )
-    app.GAME = game.NewGame([i.nbjetons for i in app.gameframes])
-    app.playerbtn["state"] = "disabled"
-    app.ordibtn["state"] = "normal"
-
-
-def userplay():
-    global app
-    app.GAME.player(app.tasselected, app.jetonsselected)
-    for i in range(app.jetonsselected):
-        app.gameframes[app.tasselected].jetons[i].configure(bg="#BBBCBE")
-    updateGame()
-
-
-def ordiplay():
-    global app
-    app.GAME.ordi()
-    for i in range(app.jetonsselected):
-        app.gameframes[tasselected].jetons[i].configure(bg="#BBBCBE")
-    for i in range(len(app.GAME.position)):
-        if app.GAME.position[i] != len(app.gameframes[i].jetons):
-            app.tasselected = i
-            app.jetonsselected = len(app.gameframes[i].jetons) - app.GAME.position[i]
-            break
-    updateGame()
-
-
-def updateGame():
-    global app
-    blink()
-    app.gameframes[app.tasselected].frame.destroy()
-    app.gameframes[app.tasselected] = FrameTas(
-        app.GAME.position[app.tasselected], app.tasselected, app.gamescene
-    )
-    app.tasselected = None
-    app.jetonsselected = 0
-    app.playerbtn["state"] = "disabled"
-    if app.GAME.isEnded():
-        app.ordibtn["state"] = "disabled"
-        app.startgameframebtn["state"] = "disabled"
-        endMsg()
-
-
-def endMsg():
-    global app
-    Label(
-        app.gamescene,
-        text="La partie est finie",
-    ).grid(
-        sticky=(N, S, W, E),
-    )
-
-
-def checkSpin():
-    global app
-    if app.tasval.get() == 0 or app.jetonsval.get() == 0:
-        app.startgameframebtn["state"] = "disabled"
-    else:
-        app.startgameframebtn["state"] = "normal"
-
-
-def blink():
-    global app
-    for loop in range(3):
-        for i in range(app.jetonsselected):
-            app.gameframes[app.tasselected].jetons[-(i + 1)].configure(bg="#3DAEE9")
-            app.gameframes[app.tasselected].jetons[-(i + 1)].update()
-        time.sleep(0.5)
-        for i in range(app.jetonsselected):
-            app.gameframes[app.tasselected].jetons[-(i + 1)].configure(bg="#BBBCBE")
-            app.gameframes[app.tasselected].jetons[-(i + 1)].update()
-        time.sleep(0.3)
-
-
 class App:
     def __init__(self):
         self.gameframes = []
@@ -211,7 +80,7 @@ class App:
             to=15,
             textvariable=self.tasval,
             width=5,
-            command=checkSpin,
+            command=self.checkSpin,
         )
         choicetaslabel = ttk.Label(startgameframe, text="Nombre de tas")
         self.jetonsval = IntVar()
@@ -221,7 +90,7 @@ class App:
             to=15,
             textvariable=self.jetonsval,
             width=5,
-            command=checkSpin,
+            command=self.checkSpin,
         )
         choicejetonslabel = ttk.Label(startgameframe, text="Nombre de jetons")
         self.startgameframebtn = ttk.Button(
@@ -229,7 +98,7 @@ class App:
             text="Démarrer le jeu",
             state="disabled",
             command=lambda: [
-                startgame(self.tasval.get(), self.jetonsval.get()),
+                self.startgame(self.tasval.get(), self.jetonsval.get()),
             ],
         )
 
@@ -263,13 +132,13 @@ class App:
             playframe,
             text="Jouer",
             state="disabled",
-            command=userplay,
+            command=self.userplay,
         )
         self.ordibtn = ttk.Button(
             playframe,
             text="L'ordinateur joue",
             state="disabled",
-            command=ordiplay,
+            command=self.ordiplay,
         )
 
         playframe.columnconfigure(0, weight=1, minsize=20)
@@ -279,7 +148,130 @@ class App:
         self.playerbtn.grid(column=0, row=0, sticky=(N, S, W, E))
         self.ordibtn.grid(column=1, row=0, sticky=(N, S, W, E))
 
+    def start(self):
+        self.ROOT.mainloop()
+
+    def stop(self):
+        self.ROOT.destroy()
+
+    def startgame(self, tas, jetons):
+        random.seed()
+        self.gameframes.clear()
+        self.tasselected = None
+        self.jetonsselected = 0
+        for widget in self.gamescene.winfo_children():
+            widget.destroy()
+        for i in range(tas):
+            self.gameframes.append(
+                self.FrameTas(self,random.randrange(1, jetons + 1), i, )
+            )
+        self.GAME = game.NewGame([i.nbjetons for i in self.gameframes])
+        self.playerbtn["state"] = "disabled"
+        self.ordibtn["state"] = "normal"
+
+
+    def userplay(self):
+        self.GAME.player(self.tasselected, self.jetonsselected)
+        for i in range(self.jetonsselected):
+            self.gameframes[self.tasselected].jetons[i].configure(bg="#BBBCBE")
+        self.updateGame()
+
+
+    def ordiplay(self):
+        self.GAME.ordi()
+        for i in range(self.jetonsselected):
+            self.gameframes[self.tasselected].jetons[i].configure(bg="#BBBCBE")
+        for i in range(len(self.GAME.position)):
+            if self.GAME.position[i] != len(self.gameframes[i].jetons):
+                self.tasselected = i
+                self.jetonsselected = len(self.gameframes[i].jetons) - self.GAME.position[i]
+                break
+        self.updateGame()
+
+
+    def updateGame(self):
+        self.blink()
+        for i in range(self.jetonsselected):
+            self.gameframes[self.tasselected].jetons.pop().destroy()
+        self.tasselected = None
+        self.jetonsselected = 0
+        self.playerbtn["state"] = "disabled"
+        if self.GAME.isEnded():
+            self.ordibtn["state"] = "disabled"
+            self.startgameframebtn["state"] = "disabled"
+            self.endMsg()
+
+
+    def endMsg(self):
+        Label(
+            self.gamescene,
+            text="La partie est finie",
+        ).grid(
+            sticky=(N, S, W, E),
+        )
+
+
+    def checkSpin(self):
+        if self.tasval.get() == 0 or self.jetonsval.get() == 0:
+            self.startgameframebtn["state"] = "disabled"
+        else:
+            self.startgameframebtn["state"] = "normal"
+
+
+    def blink(self):
+        for loop in range(3):
+            for i in range(self.jetonsselected):
+                self.gameframes[self.tasselected].jetons[-(i + 1)].configure(bg="#3DAEE9")
+                self.gameframes[self.tasselected].jetons[-(i + 1)].update()
+            time.sleep(0.5)
+            for i in range(self.jetonsselected):
+                self.gameframes[self.tasselected].jetons[-(i + 1)].configure(bg="#BBBCBE")
+                self.gameframes[self.tasselected].jetons[-(i + 1)].update()
+            time.sleep(0.3)
+
+    class FrameTas():
+        def __init__(self, parent, jetons, column):
+            self.parent = parent
+            self.frame = ttk.Frame(self.parent.gamescene)
+            self.column = column
+            self.nbjetons = jetons
+            self.jetons = []
+            self.frame.grid(
+                column=self.column,
+                row=0,
+                sticky=(N, E, W, S),
+            )
+            self.generate()
+
+        def generate(self):
+            for i in range(self.nbjetons):
+                self.jetons.append(
+                    Button(
+                        self.frame,
+                        text=" ",
+                        width=1,
+                        background="#BBBCBE",
+                        command=self.btncommand,
+                    )
+                )
+                self.jetons[i].grid(column=0, row=i)
+
+        def btncommand(self):
+            if self.parent.tasselected == None or self.parent.tasselected == self.column:
+                self.parent.tasselected = self.column
+                if self.parent.jetonsselected < len(self.parent.gameframes[self.column].jetons):
+                    self.parent.gameframes[self.column].jetons[-(self.parent.jetonsselected + 1)].configure(
+                        background="#3DAEE9"
+                    )
+                    self.parent.jetonsselected += 1
+                    self.parent.playerbtn["state"] = "normal"
+                else:
+                    for k in self.parent.gameframes[self.column].jetons:
+                        k.configure(background="#BBBCBE")
+                    self.parent.jetonsselected = 0
+                    self.parent.tasselected = None
+                    self.parent.playerbtn["state"] = "disabled"
 
 if __name__ == "__main__":
     app = App()
-    app.ROOT.mainloop()
+    app.start()
