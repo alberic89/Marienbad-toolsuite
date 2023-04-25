@@ -26,16 +26,16 @@ import toolbox
 
 
 def solve(args):
-    r = toolbox.findSolution(tuple(args.situation), all == args.all)
+    r = toolbox.findSolution(tuple(args.situation), findall = args.all)
     if r == False:
         print("Aucune solution trouvée.")
     else:
         print(
             "Voici "
             + ("les" if len(r) > 1 else "la")
-            + " solution "
+            + " solution"
             + ("s" if len(r) > 1 else "")
-            + "trouvée"
+            + " trouvée"
             + ("s" if len(r) > 1 else "")
             + " :"
         )
@@ -67,7 +67,9 @@ def generate(args):
         print(i)
 
 def play(args):
-    import gui
+    import ggame
+    app = ggame.App()
+    app.start()
 
 # Parser principal
 parser = argparse.ArgumentParser(

@@ -42,7 +42,7 @@ class App:
         self.ROOT.tk.call(
             "source",
             os.path.join(
-                os.path.abspath(os.path.curdir),
+                os.getcwd(),
                 "ttk-Breeze",
                 "breeze.tcl",
             ),
