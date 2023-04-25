@@ -25,7 +25,7 @@ from itertools import combinations_with_replacement
 from functools import cache
 
 # Les fonctions avec des commentaires sont les principales,
-#  les autres ne sont que des sous-routines utiles.
+# les autres ne sont que des sous-routines utiles.
 
 
 def replaceInPosition(position: tuple, oldvalue: int, newvalue: int) -> tuple:
@@ -66,9 +66,9 @@ def check(position: tuple) -> (bool or int):
 
 
 @cache
-def findSolution(position: tuple, all=False) -> (tuple or bool):
+def findSolution(position: tuple, findall=False) -> (tuple or bool):
     """Retourne une ou plusieurs solutions à cette position."""
-    """Usage : findSolution(<position>) ou findSolution(<position>, all=True)"""
+    """Usage : findSolution(<position>) ou findSolution(<position>, findall=True)"""
     """Retourne False si pas de solution, ou les solutions sous forme d'un tuple de tuples."""
     # Si la position est gagnante, pas de solutions.
     nsomme = check(position)
@@ -79,7 +79,7 @@ def findSolution(position: tuple, all=False) -> (tuple or bool):
     for tas in listAllNumber(position):
         if bitIsOne(tas, nfirstbit):
             solutions.append(replaceInPosition(position, tas, tas ^ nsomme))
-            if all == False:
+            if findall == False:
                 break
     if solutions != []:
         return tuple(solutions)
