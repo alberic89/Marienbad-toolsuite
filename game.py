@@ -49,7 +49,6 @@ class NewGame:
         self.position = jetons.copy()
         self.sani()
 
-
     # les actions du joueur doivent indiqué le tas joué et le nombre de jetons enlevés
     def player(self, tas: int, jetons: int) -> None:
         self.sani()
@@ -58,7 +57,7 @@ class NewGame:
     # l'ordinateur joue le meilleur coup s'il existe, et sinon un coup aléatoire
     def ordi(self):
         self.sani()
-        s = findSolution(tuple(self.position), all=True)
+        s = findSolution(tuple(self.position), findall=True)
         if s == False:
             while True:
                 tas = random.randrange(0, len(self.position))
@@ -82,6 +81,6 @@ class NewGame:
             if i < 0:
                 raise GameErrorPosition(self.position)
             elif i == 0:
-                elementsnull +=1
+                elementsnull += 1
         if elementsnull == len(self.position):
             raise GameErrorEnd()

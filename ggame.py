@@ -75,32 +75,30 @@ class App:
 
         startgameframe = ttk.Frame(self.ROOT)
         self.tasval = IntVar()
-        choicetas = ttk.Spinbox(
+        self.choicetas = ttk.Spinbox(
             startgameframe,
             from_=1,
             to=15,
             textvariable=self.tasval,
             width=5,
-            command=self.checkSpin,
+            validatecommand=self.checkSpin,
         )
         choicetaslabel = ttk.Label(startgameframe, text="Nombre de tas")
         self.jetonsval = IntVar()
-        choicejetons = ttk.Spinbox(
+        self.choicejetons = ttk.Spinbox(
             startgameframe,
             from_=1,
             to=15,
             textvariable=self.jetonsval,
             width=5,
-            command=self.checkSpin,
+            validatecommand=self.checkSpin,
         )
         choicejetonslabel = ttk.Label(startgameframe, text="Nombre de jetons")
-        self.startgameframebtn = ttk.Button(
+        self.startgamebtn = ttk.Button(
             startgameframe,
             text="Démarrer le jeu",
             state="disabled",
-            command=lambda: [
-                self.startgame(self.tasval.get(), self.jetonsval.get()),
-            ],
+            command=self.startgame,
         )
 
         startgameframe.columnconfigure(0, weight=1, minsize=10)
@@ -116,11 +114,11 @@ class App:
         )
 
         startgameframe.grid(column=0, row=0, sticky=(N, S, W, E))
-        choicetas.grid(column=0, row=0, sticky=(N, S, E))
+        self.choicetas.grid(column=0, row=0, sticky=(N, S, E))
         choicetaslabel.grid(column=1, row=0, sticky=(N, S, W))
-        choicejetons.grid(column=0, row=1, sticky=(N, S, E))
+        self.choicejetons.grid(column=0, row=1, sticky=(N, S, E))
         choicejetonslabel.grid(column=1, row=1, sticky=(N, S, W))
-        self.startgameframebtn.grid(column=2, row=0, rowspan=2)
+        self.startgamebtn.grid(column=2, row=0, rowspan=2)
 
         self.gamescene = ttk.Frame(self.ROOT)
         for i in range(15):
@@ -155,24 +153,26 @@ class App:
     def stop(self):
         self.ROOT.destroy()
 
-    def startgame(self, tas, jetons):
+    def startgame(self):
+        if self.checkSpin() == False:
+            return False
         random.seed()
         self.gameframes.clear()
-        self.tasselected = None
-        self.jetonsselected = 0
         for widget in self.gamescene.winfo_children():
             widget.destroy()
-        for i in range(tas):
+        for i in range(self.tasval.get()):
             self.gameframes.append(
                 self.FrameTas(
                     self,
-                    random.randrange(1, jetons + 1),
+                    random.randrange(1, self.jetonsval.get() + 1),
                     i,
                 )
             )
         self.GAME = game.NewGame([i.nbjetons for i in self.gameframes])
         self.playerbtn["state"] = "disabled"
         self.ordibtn["state"] = "normal"
+        self.tasselected = None
+        self.jetonsselected = 0
 
     def userplay(self):
         self.GAME.player(self.tasselected, self.jetonsselected)
@@ -202,7 +202,7 @@ class App:
         self.playerbtn["state"] = "disabled"
         if self.GAME.isEnded():
             self.ordibtn["state"] = "disabled"
-            self.startgameframebtn["state"] = "disabled"
+            self.startgamebtn["state"] = "disabled"
             self.endMsg()
 
     def endMsg(self):
@@ -215,10 +215,29 @@ class App:
         )
 
     def checkSpin(self):
-        if self.tasval.get() == 0 or self.jetonsval.get() == 0:
-            self.startgameframebtn["state"] = "disabled"
-        else:
-            self.startgameframebtn["state"] = "normal"
+        safe = [False, False]
+        try:
+            if str(self.tasval.get()).isdigit():
+                if self.tasval.get() != 0:
+                    safe[0] = True
+            else:
+                self.choicetas.set(0)
+        except:
+            self.choicetas.set(0)
+        try:
+            if str(self.jetonsval.get()).isdigit():
+                if self.jetonsval.get() != 0:
+                    safe[1] = True
+            else:
+                self.jetonsval.set(0)
+        except:
+            self.jetonsval.set(0)
+        for i in safe:
+            if i == False:
+                self.startgamebtn["state"] = "disabled"
+                return False
+        self.startgamebtn["state"] = "normal"
+        return True
 
     def blink(self):
         for loop in range(3):

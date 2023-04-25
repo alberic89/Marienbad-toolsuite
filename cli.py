@@ -26,7 +26,7 @@ import toolbox
 
 
 def solve(args):
-    r = toolbox.findSolution(tuple(args.situation), findall = args.all)
+    r = toolbox.findSolution(tuple(args.situation), findall=args.all)
     if r == False:
         print("Aucune solution trouvée.")
     else:
@@ -66,10 +66,18 @@ def generate(args):
     for i in r:
         print(i)
 
+
 def play(args):
     import ggame
+
     app = ggame.App()
+    if args.njetons != None:
+        app.choicejetons.set(args.njetons)
+    if args.ntas != None:
+        app.choicetas.set(args.ntas)
+    app.startgame()
     app.start()
+
 
 # Parser principal
 parser = argparse.ArgumentParser(
@@ -128,8 +136,20 @@ parser_generate.add_argument(
 )
 parser_generate.set_defaults(tool=generate)
 # Parser play
-parser_play = subparsers.add_parser(
-    "play", help="Jouer au jeu de Marienbad"
+parser_play = subparsers.add_parser("play", help="Jouer au jeu de Marienbad")
+parser_play.add_argument(
+    "--njetons",
+    "-j",
+    help="Nombre de jetons maximum par tas",
+    default=None,
+    type=int,
+)
+parser_play.add_argument(
+    "--ntas",
+    "-t",
+    help="Nombre de tas",
+    default=None,
+    type=int,
 )
 parser_play.set_defaults(tool=play)
 

@@ -56,7 +56,7 @@ def listAllNumber(position: tuple) -> tuple:
     return tuple(numbers)
 
 
-def check(position: tuple) -> (bool or int):
+def check(position: tuple) -> bool or int:
     """Vérifie la position en calculant la somme xor du tuple."""
     """Retourne la somme xor."""
     s = 0
@@ -66,7 +66,7 @@ def check(position: tuple) -> (bool or int):
 
 
 @cache
-def findSolution(position: tuple, findall=False) -> (tuple or bool):
+def findSolution(position: tuple, findall=False) -> tuple or bool:
     """Retourne une ou plusieurs solutions à cette position."""
     """Usage : findSolution(<position>) ou findSolution(<position>, findall=True)"""
     """Retourne False si pas de solution, ou les solutions sous forme d'un tuple de tuples."""
@@ -101,7 +101,9 @@ def generatePosition(nbjetons: int, nbtas: int, x_tas_only=False) -> tuple:
         tas = tuple(range(1, nbtas + 1))
     for loop in tas:
         # Génère toutes les combinaisons possibles
-        for i in combinations_with_replacement(jetons, loop):  # Teste les combinaisons
+        for i in combinations_with_replacement(
+            jetons, loop
+        ):  # Teste les combinaisons
             if check(i) == 0:
                 positions.append(i)
     return positions
