@@ -81,6 +81,7 @@ class App:
             to=15,
             textvariable=self.tasval,
             width=5,
+            command=self.checkSpin,
             validatecommand=self.checkSpin,
         )
         choicetaslabel = ttk.Label(startgameframe, text="Nombre de tas")
@@ -91,6 +92,7 @@ class App:
             to=15,
             textvariable=self.jetonsval,
             width=5,
+            command=self.checkSpin,
             validatecommand=self.checkSpin,
         )
         choicejetonslabel = ttk.Label(startgameframe, text="Nombre de jetons")
@@ -101,30 +103,80 @@ class App:
             command=self.startgame,
         )
 
-        startgameframe.columnconfigure(0, weight=1, minsize=10)
-        startgameframe.columnconfigure(1, weight=2, minsize=20)
-        startgameframe.columnconfigure(2, weight=2, minsize=20)
+        startgameframe.columnconfigure(
+            0,
+            weight=1,
+            minsize=10,
+        )
+        startgameframe.columnconfigure(
+            1,
+            weight=2,
+            minsize=20,
+        )
+        startgameframe.columnconfigure(
+            2,
+            weight=2,
+            minsize=20,
+        )
         startgameframe.rowconfigure(
             0,
             weight=1,
+            minsize=20,
         )
         startgameframe.rowconfigure(
             1,
             weight=1,
+            minsize=20,
         )
 
-        startgameframe.grid(column=0, row=0, sticky=(N, S, W, E))
-        self.choicetas.grid(column=0, row=0, sticky=(N, S, E))
-        choicetaslabel.grid(column=1, row=0, sticky=(N, S, W))
-        self.choicejetons.grid(column=0, row=1, sticky=(N, S, E))
-        choicejetonslabel.grid(column=1, row=1, sticky=(N, S, W))
-        self.startgamebtn.grid(column=2, row=0, rowspan=2)
+        startgameframe.grid(
+            column=0,
+            row=0,
+            sticky=(N, S, W, E),
+        )
+        self.choicetas.grid(
+            column=0,
+            row=0,
+            sticky=(N, S, E),
+        )
+        choicetaslabel.grid(
+            column=1,
+            row=0,
+            sticky=(N, S, W),
+        )
+        self.choicejetons.grid(
+            column=0,
+            row=1,
+            sticky=(N, S, E),
+        )
+        choicejetonslabel.grid(
+            column=1,
+            row=1,
+            sticky=(N, S, W),
+        )
+        self.startgamebtn.grid(
+            column=2,
+            row=0,
+            rowspan=2,
+        )
 
         self.gamescene = ttk.Frame(self.ROOT)
         for i in range(15):
-            self.gamescene.columnconfigure(i, weight=1, minsize=25)
-        self.gamescene.rowconfigure(0, weight=1, minsize=80)
-        self.gamescene.grid(column=0, row=1, sticky=(N, S, W, E))
+            self.gamescene.columnconfigure(
+                i,
+                weight=1,
+                minsize=20,
+            )
+        self.gamescene.rowconfigure(
+            0,
+            weight=1,
+            minsize=30,
+        )
+        self.gamescene.grid(
+            column=0,
+            row=1,
+            sticky=(N, S, W, E),
+        )
 
         playframe = ttk.Frame(self.ROOT)
         self.playerbtn = ttk.Button(
@@ -140,12 +192,32 @@ class App:
             command=self.ordiplay,
         )
 
-        playframe.columnconfigure(0, weight=1, minsize=20)
-        playframe.columnconfigure(1, weight=1, minsize=20)
+        playframe.columnconfigure(
+            0,
+            weight=1,
+            minsize=20,
+        )
+        playframe.columnconfigure(
+            1,
+            weight=1,
+            minsize=20,
+        )
 
-        playframe.grid(column=0, row=2, sticky=(N, S, W, E))
-        self.playerbtn.grid(column=0, row=0, sticky=(N, S, W, E))
-        self.ordibtn.grid(column=1, row=0, sticky=(N, S, W, E))
+        playframe.grid(
+            column=0,
+            row=2,
+            sticky=(N, S, W, E),
+        )
+        self.playerbtn.grid(
+            column=0,
+            row=0,
+            sticky=(N, S, W, E),
+        )
+        self.ordibtn.grid(
+            column=1,
+            row=0,
+            sticky=(N, S, W, E),
+        )
 
     def start(self):
         self.ROOT.mainloop()
@@ -154,6 +226,7 @@ class App:
         self.ROOT.destroy()
 
     def startgame(self):
+        self.ROOT.focus_set()
         if self.checkSpin() == False:
             return False
         random.seed()
@@ -194,15 +267,23 @@ class App:
         self.updateGame()
 
     def updateGame(self):
+        self.ordibtn["state"] = "disabled"
+        self.playerbtn["state"] = "disabled"
+        self.startgamebtn["state"] = "disabled"
+        self.choicetas["state"] = "disabled"
+        self.choicejetons["state"] = "disabled"
+        self.ROOT.focus_set()
         self.blink()
         for i in range(self.jetonsselected):
             self.gameframes[self.tasselected].jetons.pop().destroy()
         self.tasselected = None
         self.jetonsselected = 0
-        self.playerbtn["state"] = "disabled"
+        self.startgamebtn["state"] = "normal"
+        self.ordibtn["state"] = "normal"
+        self.choicetas["state"] = "normal"
+        self.choicejetons["state"] = "normal"
         if self.GAME.isEnded():
             self.ordibtn["state"] = "disabled"
-            self.startgamebtn["state"] = "disabled"
             self.endMsg()
 
     def endMsg(self):
@@ -210,9 +291,8 @@ class App:
         Label(
             self.gamescene,
             text="La partie est finie",
-        ).grid(
-            sticky=(N, S, W, E),
-        )
+            font=("default", 30),
+        ).place(relx=0.5, rely=0.5, anchor="center")
 
     def checkSpin(self):
         safe = [False, False]
