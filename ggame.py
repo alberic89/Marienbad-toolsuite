@@ -74,9 +74,27 @@ class App:
         self.ROOT.rowconfigure(2, weight=1, minsize=40)
 
         startgameframe = ttk.Frame(self.ROOT)
+        self.paramframe = ttk.Frame(startgameframe)
+        self.spins = []
+        self.generation = StringVar()
+        self.israndom = ttk.Radiobutton(
+            startgameframe,
+            text="Jeu aléatoire",
+            variable=self.generation,
+            value="random",
+            command=self.createSpins,
+        )
+        self.ispreset = ttk.Radiobutton(
+            startgameframe,
+            text="Jeu paramétré",
+            variable=self.generation,
+            value="preset",
+            command=self.createSpins,
+        )
+        self.generation.set("random")
         self.tasval = IntVar()
         self.choicetas = ttk.Spinbox(
-            startgameframe,
+            self.paramframe,
             from_=1,
             to=15,
             textvariable=self.tasval,
@@ -84,10 +102,10 @@ class App:
             command=self.checkSpin,
             validatecommand=self.checkSpin,
         )
-        choicetaslabel = ttk.Label(startgameframe, text="Nombre de tas")
+        choicetaslabel = ttk.Label(self.paramframe, text="Nombre de tas")
         self.jetonsval = IntVar()
         self.choicejetons = ttk.Spinbox(
-            startgameframe,
+            self.paramframe,
             from_=1,
             to=15,
             textvariable=self.jetonsval,
@@ -95,7 +113,7 @@ class App:
             command=self.checkSpin,
             validatecommand=self.checkSpin,
         )
-        choicejetonslabel = ttk.Label(startgameframe, text="Nombre de jetons")
+        choicejetonslabel = ttk.Label(self.paramframe, text="Nombre de jetons")
         self.startgamebtn = ttk.Button(
             startgameframe,
             text="Démarrer le jeu",
@@ -133,6 +151,21 @@ class App:
             column=0,
             row=0,
             sticky=(N, S, W, E),
+        )
+        self.israndom.grid(
+            column=0,
+            row=0,
+            sticky=(N, S, W),
+        )
+        self.ispreset.grid(
+            column=0,
+            row=1,
+            sticky=(N, S, W),
+        )
+        self.paramframe.grid(
+            column=1,
+            row=0,
+            rowspan=2,
         )
         self.choicetas.grid(
             column=0,
@@ -224,6 +257,66 @@ class App:
 
     def stop(self):
         self.ROOT.destroy()
+
+    def createSpins(self):
+        for widget in self.paramframe.winfo_children():
+            widget.grid_remove()
+            widget.grid_forget()
+            widget.destroy()
+        self.tasval = IntVar()
+        self.choicetas = ttk.Spinbox(
+            self.paramframe,
+            from_=1,
+            to=15,
+            textvariable=self.tasval,
+            width=5,
+            command=self.checkSpin,
+            validatecommand=self.checkSpin,
+        )
+        choicetaslabel = ttk.Label(self.paramframe, text="Nombre de tas")
+        self.jetonsval = IntVar()
+        self.choicejetons = ttk.Spinbox(
+            self.paramframe,
+            from_=1,
+            to=15,
+            textvariable=self.jetonsval,
+            width=5,
+            command=self.checkSpin,
+            validatecommand=self.checkSpin,
+        )
+        choicejetonslabel = ttk.Label(self.paramframe, text="Nombre de jetons")
+        if self.generation.get() == "random":
+            self.choicetas.grid(
+                column=0,
+                row=0,
+                sticky=(N, S, E),
+            )
+            choicetaslabel.grid(
+                column=1,
+                row=0,
+                sticky=(N, S, W),
+            )
+            self.choicejetons.grid(
+                column=0,
+                row=1,
+                sticky=(N, S, E),
+            )
+            choicejetonslabel.grid(
+                column=1,
+                row=1,
+                sticky=(N, S, W),
+            )
+        elif self.generation.get() == "preset":
+            self.choicetas.grid(
+                column=0,
+                row=0,
+                sticky=(N, S, E),
+            )
+            choicetaslabel.grid(
+                column=1,
+                row=0,
+                sticky=(N, S, W),
+            )
 
     def startgame(self):
         self.ROOT.focus_set()
