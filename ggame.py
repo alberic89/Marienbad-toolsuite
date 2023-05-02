@@ -76,6 +76,7 @@ class App:
         startgameframe = ttk.Frame(self.ROOT)
         self.paramframe = ttk.Frame(startgameframe)
         self.spins = []
+        self.spinsvariables = []
         self.generation = StringVar()
         self.israndom = ttk.Radiobutton(
             startgameframe,
@@ -263,16 +264,6 @@ class App:
             widget.grid_remove()
             widget.grid_forget()
             widget.destroy()
-        self.tasval = IntVar()
-        self.choicetas = ttk.Spinbox(
-            self.paramframe,
-            from_=1,
-            to=15,
-            textvariable=self.tasval,
-            width=5,
-            command=self.checkSpin,
-            validatecommand=self.checkSpin,
-        )
         choicetaslabel = ttk.Label(self.paramframe, text="Nombre de tas")
         self.jetonsval = IntVar()
         self.choicejetons = ttk.Spinbox(
@@ -286,6 +277,15 @@ class App:
         )
         choicejetonslabel = ttk.Label(self.paramframe, text="Nombre de jetons")
         if self.generation.get() == "random":
+            self.choicetas = ttk.Spinbox(
+                self.paramframe,
+                from_=1,
+                to=15,
+                textvariable=self.tasval,
+                width=5,
+                command=self.checkSpin,
+                validatecommand=self.checkSpin,
+            )
             self.choicetas.grid(
                 column=0,
                 row=0,
@@ -307,6 +307,15 @@ class App:
                 sticky=(N, S, W),
             )
         elif self.generation.get() == "preset":
+            self.choicetas = ttk.Spinbox(
+                self.paramframe,
+                from_=1,
+                to=15,
+                textvariable=self.tasval,
+                width=5,
+                command=self.addSpins,
+                validatecommand=self.checkSpin,
+            )
             self.choicetas.grid(
                 column=0,
                 row=0,
@@ -317,6 +326,24 @@ class App:
                 row=0,
                 sticky=(N, S, W),
             )
+
+    def addSpins(self):
+        if self.checkSpin() == False :
+            return False
+        while int(self.tasval.get()) > len(self.spins):
+            self.spinsvariables.append(IntVar())
+            self.spins.append(ttk.Spinbox(
+                self.paramframe,
+                from_=1,
+                to=15,
+                textvariable=self.spinsvariables[-1],
+                width=5,
+                command=self.checkSpin,
+                validatecommand=self.checkSpin,))
+            self.spins[-1].grid(column=(len(self.spins)-1), row=1)
+        while int(self.tasval.get()) < len(self.spins):
+            self.spinsvariables.pop.destroy()
+        self.paramframe.update()
 
     def startgame(self):
         self.ROOT.focus_set()
@@ -419,13 +446,13 @@ class App:
                     bg="#3DAEE9"
                 )
                 self.gameframes[self.tasselected].jetons[-(i + 1)].update()
-            time.sleep(0.5)
+            time.sleep(0.4)
             for i in range(self.jetonsselected):
                 self.gameframes[self.tasselected].jetons[-(i + 1)].configure(
                     bg="#BBBCBE"
                 )
                 self.gameframes[self.tasselected].jetons[-(i + 1)].update()
-            time.sleep(0.3)
+            time.sleep(0.2)
 
     class FrameTas:
         def __init__(self, parent, jetons, column):
